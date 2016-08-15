@@ -159,15 +159,15 @@ entity scarab_xram_sdram is
   (
     clk_50MHz: in std_logic;
     sdram_clk: out std_logic;
-    sdram_cke: out std_logic;
-    sdram_csn: out std_logic;
-    sdram_rasn: out std_logic;
-    sdram_casn: out std_logic;
-    sdram_wen: out std_logic;
-    sdram_a: out std_logic_vector (12 downto 0);
-    sdram_ba: out std_logic_vector(1 downto 0);
-    sdram_dqm: out std_logic_vector(1 downto 0);
-    sdram_d: inout std_logic_vector (15 downto 0);
+--    sdram_cke: out std_logic;
+--    sdram_csn: out std_logic;
+--    sdram_rasn: out std_logic;
+--    sdram_casn: out std_logic;
+--    sdram_wen: out std_logic;
+--    sdram_a: out std_logic_vector (12 downto 0);
+--    sdram_ba: out std_logic_vector(1 downto 0);
+--    sdram_dqm: out std_logic_vector(1 downto 0);
+--    sdram_d: inout std_logic_vector (15 downto 0);
     rs232_tx: out std_logic;
     rs232_rx: in std_logic;
     flash_cs, flash_cclk, flash_mosi: out std_logic;
@@ -178,7 +178,7 @@ entity scarab_xram_sdram is
     porta, portb, portc: inout std_logic_vector(11 downto 0);
     portd: inout std_logic_vector(3 downto 0); -- fm and cw antennas are here
     porte, portf: inout std_logic_vector(11 downto 0);
-    audio1, audio2: out std_logic; -- 3.5mm audio jack
+--    audio1, audio2: out std_logic; -- 3.5mm audio jack
     -- warning TMDS_in is used as output
     TMDS_in_P, TMDS_in_N: out std_logic_vector(2 downto 0);
     TMDS_in_CLK_P, TMDS_in_CLK_N: out std_logic;
@@ -312,147 +312,187 @@ begin
     );
   end generate; -- G_vendor_specific_startup
 
-  -- generic SDRAM glue
-  glue_xram: entity work.glue_xram
+  -- generic BRAM glue
+  glue_bram: entity work.glue_bram
     generic map
-    (
+	 (
       C_arch => C_arch,
       C_clk_freq => C_clk_freq,
       C_bram_size => C_bram_size,
-      C_icache_size => C_icache_size,
-      C_dcache_size => C_dcache_size,
-      C_cached_addr_bits => C_cached_addr_bits,
       C_gpio => C_gpio,
       C_sio => C_sio,
       C_spi => C_spi,
-      C_xram_base => C_xram_base,
-      C_sdram => C_sdram,
-      C_sdram_address_width => 24,
-      C_sdram_column_bits => 9,
-      C_sdram_startup_cycles => 10100,
-      C_sdram_cycles_per_refresh => 1524,
-
-      -- HDMI/DVI-D output SDR or DDR
-      C_dvid_ddr => C_dvid_ddr,
-      -- vga simple compositing bitmap only graphics
-      C_vgahdmi => C_vgahdmi,
-      C_vgahdmi_cache_size => C_vgahdmi_cache_size,
---      C_vgahdmi_fifo_width => C_vgahdmi_fifo_width,
---      C_vgahdmi_fifo_height => C_vgahdmi_fifo_height,
-      C_vgahdmi_fifo_data_width => C_vgahdmi_fifo_data_width,
---      C_vgahdmi_fifo_addr_width => C_vgahdmi_fifo_addr_width,
-      -- led strip simple compositing bitmap only graphics
-      C_ledstrip => C_ledstrip,
-      C_ledstrip_fifo_width => C_ledstrip_fifo_width,
-      C_ledstrip_fifo_height => C_ledstrip_fifo_height,
-      C_ledstrip_fifo_data_width => C_ledstrip_fifo_data_width,
-      C_ledstrip_fifo_addr_width => C_ledstrip_fifo_addr_width,
-      -- vga advanced graphics text+compositing bitmap
-      C_vgatext => C_vgatext,
-      C_vgatext_label => C_vgatext_label,
-      C_vgatext_mode => C_vgatext_mode,
-      C_vgatext_bits => C_vgatext_bits,
-      C_vgatext_bram_mem => C_vgatext_bram_mem,
-      --C_vgatext_bram_base => C_vgatext_bram_base,
-      --C_vgatext_external_mem => C_vgatext_external_mem,
-      C_vgatext_reset => C_vgatext_reset,
-      C_vgatext_palette => C_vgatext_palette,
-      C_vgatext_text => C_vgatext_text,
-      C_vgatext_font_bram8 => C_vgatext_font_bram8,
-      C_vgatext_bus_read => C_vgatext_bus_read,
-      C_vgatext_reg_read => C_vgatext_reg_read,
-      C_vgatext_text_fifo => C_vgatext_text_fifo,
-      C_vgatext_text_fifo_step => C_vgatext_text_fifo_step,
-      C_vgatext_text_fifo_width => C_vgatext_text_fifo_width,
-      C_vgatext_char_height => C_vgatext_char_height,
-      C_vgatext_font_height => C_vgatext_font_height,
-      C_vgatext_font_depth => C_vgatext_font_depth,
-      C_vgatext_font_linedouble => C_vgatext_font_linedouble,
-      C_vgatext_font_widthdouble => C_vgatext_font_widthdouble,
-      C_vgatext_monochrome => C_vgatext_monochrome,
-      C_vgatext_finescroll => C_vgatext_finescroll,
-      C_vgatext_cursor => C_vgatext_cursor,
-      C_vgatext_cursor_blink => C_vgatext_cursor_blink,
-      C_vgatext_bitmap => C_vgatext_bitmap,
-      C_vgatext_bitmap_depth => C_vgatext_bitmap_depth,
-      C_vgatext_bitmap_fifo => C_vgatext_bitmap_fifo,
-      C_vgatext_bitmap_fifo_step => C_vgatext_bitmap_fifo_step,
-      C_vgatext_bitmap_fifo_height => C_vgatext_bitmap_fifo_height,
-      C_vgatext_bitmap_fifo_data_width => C_vgatext_bitmap_fifo_data_width,
-      C_vgatext_bitmap_fifo_addr_width => C_vgatext_bitmap_fifo_addr_width,
-      C_cw_simple_out => C_cw_simple_out, -- CW is for 433 MHz. -1 to disable. set (C_framebuffer => false, C_dds => false) for 433MHz transmitter
-      C_pcm => C_pcm,
-      C_fmrds => C_fmrds,
-      C_fm_stereo => C_fm_stereo,
-      C_fm_filter => C_fm_filter,
-      C_fm_downsample => C_fm_downsample,
-      C_rds_msg_len => C_rds_msg_len, -- bytes of RDS binary message, usually 52 (8-char PS) or 260 (8 PS + 64 RT)
-      C_fmdds_hz => C_fmdds_hz, -- Hz clk_fmdds (>2*108 MHz, e.g. 250 MHz)
-      C_rds_clock_multiply => C_rds_clock_multiply, -- multiply and divide from cpu clk 100 MHz
-      C_rds_clock_divide => C_rds_clock_divide, -- to get 1.824 MHz for RDS logic
-      C_pids => C_pids,
-      C_pid_simulator => C_pid_simulator,
-      C_pid_prescaler => C_pid_prescaler, -- set control loop frequency
-      C_pid_fp => integer(floor((log2(real(C_clk_freq)*1.0E6))+0.5))-C_pid_prescaler, -- control loop approx freq in 2^n Hz for math, 26-C_pid_prescaler = 8
-      C_pid_precision => C_pid_precision, -- fixed point PID precision
-      C_pid_pwm_bits => C_pid_pwm_bits, -- clock divider bits define PWM output frequency
-      C_vector => C_vector,
-      -- CPU debugging with serial port
-      C_debug => C_debug
-    )
-    port map
-    (
+		C_debug => C_debug
+	 )
+	 port map
+	 (
       clk => clk,
-      clk_pixel => clk_25MHz, -- pixel clock
-      clk_pixel_shift => clk_pixel_shift, -- tmds clock 10x pixel clock for SDR or 5x for DDR
-      clk_cw => clk_433M92Hz, -- CW clock for 433.92MHz transmitter
-      clk_fmdds => clk_250MHz, -- FM/RDS clock
-      -- external SDRAM interface
-      sdram_addr => sdram_a, sdram_data => sdram_d,
-      sdram_ba => sdram_ba, sdram_dqm => sdram_dqm,
-      sdram_ras => sdram_rasn, sdram_cas => sdram_casn,
-      sdram_cke => sdram_cke, sdram_clk => sdram_clk_internal,
-      sdram_we => sdram_wen, sdram_cs => sdram_csn,
-      sio_txd(0) => rs232_tx, sio_rxd(0) => rs232_rx,
+      sio_txd(0) => rs232_tx, 
+		sio_rxd(0) => rs232_rx,
       sio_break(0) => rs232_break,
-      spi_sck(0)  => flash_cclk,  spi_sck(1)  => sd_clk,
-      spi_ss(0)   => flash_cs,    spi_ss(1)   => sd_cd_dat3,
-      spi_mosi(0) => flash_mosi,  spi_mosi(1) => sd_cmd,
-      spi_miso(0) => flash_miso,  spi_miso(1) => sd_dat0,
-      dvid_red   => dvid_red,
-      dvid_green => dvid_green,
-      dvid_blue  => dvid_blue,
-      dvid_clock => dvid_clock,
-      jack_ring(3) => audio1, jack_ring(2 downto 0) => open,
-      jack_tip(3)  => audio2, jack_tip(2 downto 0)  => open,
-      cw_antenna => cw_antenna,
-      fm_antenna => fm_antenna,
-      gpio(11 downto  0) => porta(11 downto 0),
-      gpio(23 downto 12) => portb(11 downto 0),
-      gpio(35 downto 24) => portc(11 downto 0),
-      gpio(37 downto 36) => open, -- because cw/fm antennas on portd(1 downto 0)
-      gpio(39 downto 38) => portd( 3 downto 2), -- tx antennas
-      gpio(51 downto 40) => porte(11 downto 0), 
-      -- portf: GPIO
-      -- gpio(63 downto 52) => portf(11 downto 0),
-      gpio(63 downto 52) => open,
-      gpio(127 downto 64) => open,
-      -- portf: PID
-      --              PID0                           PID1                           PID2
-      --pid_encoder_a(0) => portf(0),  pid_encoder_a(1) => portf(4), -- pid_encoder_a(2) => portf(8),
-      --pid_encoder_b(0) => portf(1),  pid_encoder_b(1) => portf(5), -- pid_encoder_b(2) => portf(9),
-      --pid_bridge_f(0)  => portf(2),  pid_bridge_f(1)  => portf(6), -- pid_bridge_f(2)  => portf(10),
-      --pid_bridge_r(0)  => portf(3),  pid_bridge_r(1)  => portf(7), -- pid_bridge_r(2)  => portf(11),
-      --
-      -- portf: LEDSTRIP and POV ball motor
-      ledstrip_out(1 downto 0) => portf(1 downto 0),
-
+      spi_sck(0)  => flash_cclk,  
+		spi_sck(1)  => sd_clk,
+      spi_ss(0)   => flash_cs,    
+		spi_ss(1)   => sd_cd_dat3,
+      spi_mosi(0) => flash_mosi,  
+		spi_mosi(1) => sd_cmd,
+      spi_miso(0) => flash_miso,  
+		spi_miso(1) => sd_dat0,
       simple_out(7 downto 0) => leds(7 downto 0),
       simple_out(31 downto 8) => open,
       simple_in(15 downto 0) => open,
       simple_in(19 downto 16) => sw(4 downto 1),
       simple_in(31 downto 20) => open
-    );
+--      gpio(11 downto  0) => porta(11 downto 0),
+--      gpio(23 downto 12) => portb(11 downto 0),
+--      gpio(35 downto 24) => portc(11 downto 0),
+--      gpio(37 downto 36) => open, -- because cw/fm antennas on portd(1 downto 0)
+--      gpio(39 downto 38) => portd( 3 downto 2), -- tx antennas
+--      gpio(51 downto 40) => porte(11 downto 0), 
+--      gpio(63 downto 52) => open,
+--      gpio(127 downto 64) => open
+	 );
+  -- generic SDRAM glue
+--  glue_xram: entity work.glue_xram
+--    generic map
+--    (
+--      C_arch => C_arch,
+--      C_clk_freq => C_clk_freq,
+--      C_bram_size => C_bram_size,
+--      C_icache_size => C_icache_size,
+--      C_dcache_size => C_dcache_size,
+--      C_cached_addr_bits => C_cached_addr_bits,
+--      C_gpio => C_gpio,
+--      C_sio => C_sio,
+--      C_spi => C_spi,
+--      C_xram_base => C_xram_base,
+--      C_sdram => C_sdram,
+--      C_sdram_address_width => 24,
+--      C_sdram_column_bits => 9,
+--      C_sdram_startup_cycles => 10100,
+--      C_sdram_cycles_per_refresh => 1524,
+--
+--      -- HDMI/DVI-D output SDR or DDR
+--      C_dvid_ddr => C_dvid_ddr,
+--      -- vga simple compositing bitmap only graphics
+--      C_vgahdmi => C_vgahdmi,
+--      C_vgahdmi_cache_size => C_vgahdmi_cache_size,
+----      C_vgahdmi_fifo_width => C_vgahdmi_fifo_width,
+----      C_vgahdmi_fifo_height => C_vgahdmi_fifo_height,
+--      C_vgahdmi_fifo_data_width => C_vgahdmi_fifo_data_width,
+----      C_vgahdmi_fifo_addr_width => C_vgahdmi_fifo_addr_width,
+--      -- led strip simple compositing bitmap only graphics
+--      C_ledstrip => C_ledstrip,
+--      C_ledstrip_fifo_width => C_ledstrip_fifo_width,
+--      C_ledstrip_fifo_height => C_ledstrip_fifo_height,
+--      C_ledstrip_fifo_data_width => C_ledstrip_fifo_data_width,
+--      C_ledstrip_fifo_addr_width => C_ledstrip_fifo_addr_width,
+--      -- vga advanced graphics text+compositing bitmap
+--      C_vgatext => C_vgatext,
+--      C_vgatext_label => C_vgatext_label,
+--      C_vgatext_mode => C_vgatext_mode,
+--      C_vgatext_bits => C_vgatext_bits,
+--      C_vgatext_bram_mem => C_vgatext_bram_mem,
+--      --C_vgatext_bram_base => C_vgatext_bram_base,
+--      --C_vgatext_external_mem => C_vgatext_external_mem,
+--      C_vgatext_reset => C_vgatext_reset,
+--      C_vgatext_palette => C_vgatext_palette,
+--      C_vgatext_text => C_vgatext_text,
+--      C_vgatext_font_bram8 => C_vgatext_font_bram8,
+--      C_vgatext_bus_read => C_vgatext_bus_read,
+--      C_vgatext_reg_read => C_vgatext_reg_read,
+--      C_vgatext_text_fifo => C_vgatext_text_fifo,
+--      C_vgatext_text_fifo_step => C_vgatext_text_fifo_step,
+--      C_vgatext_text_fifo_width => C_vgatext_text_fifo_width,
+--      C_vgatext_char_height => C_vgatext_char_height,
+--      C_vgatext_font_height => C_vgatext_font_height,
+--      C_vgatext_font_depth => C_vgatext_font_depth,
+--      C_vgatext_font_linedouble => C_vgatext_font_linedouble,
+--      C_vgatext_font_widthdouble => C_vgatext_font_widthdouble,
+--      C_vgatext_monochrome => C_vgatext_monochrome,
+--      C_vgatext_finescroll => C_vgatext_finescroll,
+--      C_vgatext_cursor => C_vgatext_cursor,
+--      C_vgatext_cursor_blink => C_vgatext_cursor_blink,
+--      C_vgatext_bitmap => C_vgatext_bitmap,
+--      C_vgatext_bitmap_depth => C_vgatext_bitmap_depth,
+--      C_vgatext_bitmap_fifo => C_vgatext_bitmap_fifo,
+--      C_vgatext_bitmap_fifo_step => C_vgatext_bitmap_fifo_step,
+--      C_vgatext_bitmap_fifo_height => C_vgatext_bitmap_fifo_height,
+--      C_vgatext_bitmap_fifo_data_width => C_vgatext_bitmap_fifo_data_width,
+--      C_vgatext_bitmap_fifo_addr_width => C_vgatext_bitmap_fifo_addr_width,
+--      C_cw_simple_out => C_cw_simple_out, -- CW is for 433 MHz. -1 to disable. set (C_framebuffer => false, C_dds => false) for 433MHz transmitter
+--      C_pcm => C_pcm,
+--      C_fmrds => C_fmrds,
+--      C_fm_stereo => C_fm_stereo,
+--      C_fm_filter => C_fm_filter,
+--      C_fm_downsample => C_fm_downsample,
+--      C_rds_msg_len => C_rds_msg_len, -- bytes of RDS binary message, usually 52 (8-char PS) or 260 (8 PS + 64 RT)
+--      C_fmdds_hz => C_fmdds_hz, -- Hz clk_fmdds (>2*108 MHz, e.g. 250 MHz)
+--      C_rds_clock_multiply => C_rds_clock_multiply, -- multiply and divide from cpu clk 100 MHz
+--      C_rds_clock_divide => C_rds_clock_divide, -- to get 1.824 MHz for RDS logic
+--      C_pids => C_pids,
+--      C_pid_simulator => C_pid_simulator,
+--      C_pid_prescaler => C_pid_prescaler, -- set control loop frequency
+--      C_pid_fp => integer(floor((log2(real(C_clk_freq)*1.0E6))+0.5))-C_pid_prescaler, -- control loop approx freq in 2^n Hz for math, 26-C_pid_prescaler = 8
+--      C_pid_precision => C_pid_precision, -- fixed point PID precision
+--      C_pid_pwm_bits => C_pid_pwm_bits, -- clock divider bits define PWM output frequency
+--      C_vector => C_vector,
+--      -- CPU debugging with serial port
+--      C_debug => C_debug
+--    )
+--    port map
+--    (
+--      clk => clk,
+--      clk_pixel => clk_25MHz, -- pixel clock
+--      clk_pixel_shift => clk_pixel_shift, -- tmds clock 10x pixel clock for SDR or 5x for DDR
+--      clk_cw => clk_433M92Hz, -- CW clock for 433.92MHz transmitter
+--      clk_fmdds => clk_250MHz, -- FM/RDS clock
+--      -- external SDRAM interface
+--      sdram_addr => sdram_a, sdram_data => sdram_d,
+--      sdram_ba => sdram_ba, sdram_dqm => sdram_dqm,
+--      sdram_ras => sdram_rasn, sdram_cas => sdram_casn,
+--      sdram_cke => sdram_cke, sdram_clk => sdram_clk_internal,
+--      sdram_we => sdram_wen, sdram_cs => sdram_csn,
+--      sio_txd(0) => rs232_tx, sio_rxd(0) => rs232_rx,
+--      sio_break(0) => rs232_break,
+--      spi_sck(0)  => flash_cclk,  spi_sck(1)  => sd_clk,
+--      spi_ss(0)   => flash_cs,    spi_ss(1)   => sd_cd_dat3,
+--      spi_mosi(0) => flash_mosi,  spi_mosi(1) => sd_cmd,
+--      spi_miso(0) => flash_miso,  spi_miso(1) => sd_dat0,
+--      dvid_red   => dvid_red,
+--      dvid_green => dvid_green,
+--      dvid_blue  => dvid_blue,
+--      dvid_clock => dvid_clock,
+--      jack_ring(3) => audio1, jack_ring(2 downto 0) => open,
+--      jack_tip(3)  => audio2, jack_tip(2 downto 0)  => open,
+--      cw_antenna => cw_antenna,
+--      fm_antenna => fm_antenna,
+--      gpio(11 downto  0) => porta(11 downto 0),
+--      gpio(23 downto 12) => portb(11 downto 0),
+--      gpio(35 downto 24) => portc(11 downto 0),
+--      gpio(37 downto 36) => open, -- because cw/fm antennas on portd(1 downto 0)
+--      gpio(39 downto 38) => portd( 3 downto 2), -- tx antennas
+--      gpio(51 downto 40) => porte(11 downto 0), 
+--      -- portf: GPIO
+--      -- gpio(63 downto 52) => portf(11 downto 0),
+--      gpio(63 downto 52) => open,
+--      gpio(127 downto 64) => open,
+--      -- portf: PID
+--      --              PID0                           PID1                           PID2
+--      --pid_encoder_a(0) => portf(0),  pid_encoder_a(1) => portf(4), -- pid_encoder_a(2) => portf(8),
+--      --pid_encoder_b(0) => portf(1),  pid_encoder_b(1) => portf(5), -- pid_encoder_b(2) => portf(9),
+--      --pid_bridge_f(0)  => portf(2),  pid_bridge_f(1)  => portf(6), -- pid_bridge_f(2)  => portf(10),
+--      --pid_bridge_r(0)  => portf(3),  pid_bridge_r(1)  => portf(7), -- pid_bridge_r(2)  => portf(11),
+--      --
+--      -- portf: LEDSTRIP and POV ball motor
+--      ledstrip_out(1 downto 0) => portf(1 downto 0),
+--
+--      simple_out(7 downto 0) => leds(7 downto 0),
+--      simple_out(31 downto 8) => open,
+--      simple_in(15 downto 0) => open,
+--      simple_in(19 downto 16) => sw(4 downto 1),
+--      simple_in(31 downto 20) => open
+--    );
     -- unused pins
     FPGA_SDA <= 'Z';
     FPGA_SCL <= 'Z';
